@@ -13,7 +13,7 @@
 |  输入流  | InputStream  | Reader |
 |  输出流  | OutputStream | Writer |
 
-![](F:\学习资料\Nodes\Java基础\IO流\resources\IO框架图.jpg)
+![](resources/IO框架图.jpg)
 
 - 访问文件的是节点流，直接和文件进行操作的。剩下的都是处理流，用来对流进行包装的。
 - 对应的列都是集成抽象基类。
