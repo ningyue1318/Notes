@@ -130,7 +130,7 @@ BeanFactoryPostProcessor,BeanFactory的后置处理器，在BeanFactory标准初
 
 ​                             先触发postProcessBeforeInstantiation()方法
 
-​                             如果有返回值，触发postProcessAfterInstantiation()方法
+​                             如果有返回值，触发postProcessAfterInitialization()方法
 
 ​                     如果前面的 InstantiationAwareBeanPostProcessor没有返回代理对象
 ​                     调用Object beanInstance = doCreateBean(beanName,mbdToUse,args);
