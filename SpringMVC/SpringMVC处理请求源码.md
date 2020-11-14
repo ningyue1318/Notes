@@ -159,7 +159,23 @@ public void service(ServletRequest req, ServletResponse res)
 
 ## 1.4 HttpServletBean
 
-没有涉及处理请求，只是负责创建
+**没有涉及处理请求，只是负责创建，看处理请求可跳过**
+
+各个Servlet的作用：
+
+- HttpServletBean
+
+　　主要做一些初始化的工作，将web.xml中配置的参数设置到Servlet中。比如servlet标签的子标签init-param标签中配置的参数。
+
+- FrameworkServlet
+
+  将Servlet与Spring容器上下文关联。其实也就是初始化FrameworkServlet的属性webApplicationContext，这个属性代表   SpringMVC上下文，它有个父类上下文，既web.xml中配置的ContextLoaderListener监听器初始化的容器上下文。
+
+- DispatcherServlet
+
+　　初始化各个功能的实现类。比如异常处理、视图处理、请求映射处理等。
+
+<img src="resource\HttpServletBean.png" style="zoom:80%;" />
 
 ## 1.5 FrameWorkServlet
 
@@ -383,4 +399,201 @@ public Object invokeForRequest(NativeWebRequest request, @Nullable ModelAndViewC
 	}
 
 ```
+
+## 2.4 processDispatchResult()方法
+
+称为视图渲染过程：将数据在页面中展示
+
+```java
+private void processDispatchResult(HttpServletRequest request, HttpServletResponse response,
+			@Nullable HandlerExecutionChain mappedHandler, @Nullable ModelAndView mv,
+			@Nullable Exception exception) throws Exception {
+    
+    //调用render进行渲染
+			render(mv, request, response);
+}
+
+
+protected void render(ModelAndView mv, HttpServletRequest request, HttpServletResponse response) throws Exception {
+
+		View view;
+		String viewName = mv.getViewName();
+		if (viewName != null) {
+			// 对视图进行解析，根据视图名，获得视图
+			view = resolveViewName(viewName, mv.getModelInternal(), locale, request);
+			if (view == null) {
+				throw new ServletException("Could not resolve view with name '" + mv.getViewName() +
+						"' in servlet with name '" + getServletName() + "'");
+			}
+		}
+		else {
+			// No need to lookup: the ModelAndView object contains the actual View object.
+			view = mv.getView();
+			if (view == null) {
+				throw new ServletException("ModelAndView [" + mv + "] neither contains a view name nor a " +
+						"View object in servlet with name '" + getServletName() + "'");
+			}
+		}
+
+		// Delegate to the View object for rendering.
+		if (logger.isTraceEnabled()) {
+			logger.trace("Rendering view [" + view + "] ");
+		}
+		try {
+			if (mv.getStatus() != null) {
+				response.setStatus(mv.getStatus().value());
+			}
+			view.render(mv.getModelInternal(), request, response);
+		}
+		catch (Exception ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Error rendering view [" + view + "]", ex);
+			}
+			throw ex;
+		}
+	}
+
+
+	@Nullable
+	protected View resolveViewName(String viewName, @Nullable Map<String, Object> model,
+			Locale locale, HttpServletRequest request) throws Exception {
+
+		if (this.viewResolvers != null) {
+            //遍历所有的ViewResolver，这里只有一个ViewResolver，就是在Spring文件里面配置的InternalViewResolver对象
+			for (ViewResolver viewResolver : this.viewResolvers) {
+				View view = viewResolver.resolveViewName(viewName, locale);
+				if (view != null) {
+					return view;
+				}
+			}
+		}
+		return null;
+	}
+
+
+public View resolveViewName(String viewName, Locale locale) throws Exception {
+		//判断是否被缓存过
+        if (!isCache()) {
+			return createView(viewName, locale);
+		}
+		else {
+			Object cacheKey = getCacheKey(viewName, locale);
+			View view = this.viewAccessCache.get(cacheKey);
+			if (view == null) {
+				synchronized (this.viewCreationCache) {
+					view = this.viewCreationCache.get(cacheKey);
+					if (view == null) {
+						// 创建视图
+						view = createView(viewName, locale);
+						if (view == null && this.cacheUnresolved) {
+							view = UNRESOLVED_VIEW;
+						}
+                        //创建完成之后，放进缓存，方便下次调用
+						if (view != null && this.cacheFilter.filter(view, viewName, locale)) {
+							this.viewAccessCache.put(cacheKey, view);
+							this.viewCreationCache.put(cacheKey, view);
+						}
+					}
+				}
+			}
+			else {
+				if (logger.isTraceEnabled()) {
+					logger.trace(formatKey(cacheKey) + "served from cache");
+				}
+			}
+			return (view != UNRESOLVED_VIEW ? view : null);
+		}
+	}
+
+
+	@Override
+	protected View createView(String viewName, Locale locale) throws Exception {
+		// If this resolver is not supposed to handle the given view,
+		// return null to pass on to the next resolver in the chain.
+		if (!canHandle(viewName, locale)) {
+			return null;
+		}
+
+		// 判断是否有重定向需求，redirect
+		if (viewName.startsWith(REDIRECT_URL_PREFIX)) {
+			String redirectUrl = viewName.substring(REDIRECT_URL_PREFIX.length());
+			RedirectView view = new RedirectView(redirectUrl,
+					isRedirectContextRelative(), isRedirectHttp10Compatible());
+			String[] hosts = getRedirectHosts();
+			if (hosts != null) {
+				view.setHosts(hosts);
+			}
+			return applyLifecycleMethods(REDIRECT_URL_PREFIX, view);
+		}
+
+		// 判断是否有转发请求， forward
+		if (viewName.startsWith(FORWARD_URL_PREFIX)) {
+			String forwardUrl = viewName.substring(FORWARD_URL_PREFIX.length());
+			InternalResourceView view = new InternalResourceView(forwardUrl);
+			return applyLifecycleMethods(FORWARD_URL_PREFIX, view);
+		}
+
+		// 如果没有前缀，用父类对象创建
+		return super.createView(viewName, locale);
+	}
+
+
+//render方法中的view.render(mv.getModelInternal(), request, response)
+	public void render(@Nullable Map<String, ?> model, HttpServletRequest request,
+			HttpServletResponse response) throws Exception {
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("View " + formatViewName() +
+					", model " + (model != null ? model : Collections.emptyMap()) +
+					(this.staticAttributes.isEmpty() ? "" : ", static attributes " + this.staticAttributes));
+		}
+
+		Map<String, Object> mergedModel = createMergedOutputModel(model, request, response);
+		prepareResponse(request, response);
+        //渲染要给页面输出的所有数据
+		renderMergedOutputModel(mergedModel, getRequestToExpose(request), response);
+	}
+
+@Override
+	protected void renderMergedOutputModel(
+			Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+
+		// 将模型中的数据放在请求域中
+		exposeModelAsRequestAttributes(model, request);
+
+		// Expose helpers as request attributes, if any.
+		exposeHelpers(request);
+
+		// Determine the path for the request dispatcher.
+		String dispatcherPath = prepareForRendering(request, response);
+
+		// Obtain a RequestDispatcher for the target resource (typically a JSP).
+		RequestDispatcher rd = getRequestDispatcher(request, dispatcherPath);
+		if (rd == null) {
+			throw new ServletException("Could not get RequestDispatcher for [" + getUrl() +
+					"]: Check that the corresponding file exists within your web application archive!");
+		}
+
+		// If already included or response already committed, perform include, else forward.
+		if (useInclude(request, response)) {
+			response.setContentType(getContentType());
+			if (logger.isDebugEnabled()) {
+				logger.debug("Including [" + getUrl() + "]");
+			}
+			rd.include(request, response);
+		}
+
+		else {
+			// Note: The forwarded resource is supposed to determine the content type itself.
+			if (logger.isDebugEnabled()) {
+				logger.debug("Forwarding to [" + getUrl() + "]");
+			}
+            //进行转发
+			rd.forward(request, response);
+		}
+	}
+
+```
+
+视图解析器得到视图对象，视图对象进行转发和重定向页面，视图对象才能渲染视图
 
