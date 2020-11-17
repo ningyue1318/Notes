@@ -597,3 +597,31 @@ public View resolveViewName(String viewName, Locale locale) throws Exception {
 
 视图解析器得到视图对象，视图对象进行转发和重定向页面，视图对象才能渲染视图
 
+# 3.整体流程
+
+1. 所有请求，前端控制器收到请求，调用doDispatch进行请求处理。
+
+2. 根据handlerMapping中请求映射信息找到处理当前请求的处理器执行链（HandlerExcutionChain）
+
+3. 根据当前处理器找到当前的HandlerAdapter
+
+4. 拦截器的preHandle执行
+
+5. 适配器执行目标方法，并返回ModeAndView对象
+
+   - ModelAttribute注解标注的方法提前运行
+   - 执行目标方法的时候（确定目标方法用的参数）
+
+6. 拦截器的postHandle执行
+
+7. 处理结果
+
+   - 如果有异常使用异常解析器处理异常，处理完后返回ModeAndView
+
+   - 调用render进行页面渲染
+
+     - 视图解析器根据视图名得到视图对象
+     - 视图对象调用render方法
+   - 执行拦截器的afterCompletion
+
+![](resource\SpringMVC运行流程.png)
