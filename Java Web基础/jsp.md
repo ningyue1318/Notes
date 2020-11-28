@@ -283,4 +283,30 @@ pageContext->request->session->application
 
   ![](resource\jstl.png)
 
+###   c:choose
+
+- 多路判断，和switch...case..default非常接近
+- 标签里不能使用html注释，要使用jsp注释
+-  
+
+![](resource\jstl-choose.png)
+
+### c:forEach
+
+- 遍历输出
+
+  ![](resource\jstl-foreach.png)
+
+- 遍历数组
+
+  ```jsp
+      <%
+          request.setAttribute("arr",new String[]{"123","456","789"});
+      %>
+  
+      <c:forEach items="${arr}" var="i">
+          ${i}<br>
+      </c:forEach>
+  ```
+
   
