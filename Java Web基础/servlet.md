@@ -1,3 +1,5 @@
+# Servlet
+
 ## Servlet生命周期
 
 ```java
@@ -61,3 +63,48 @@ public class MyServlet implements Servlet {
 - 所有的Servlet都共享一个ServletContext对象，
 
 ![](resource\ServletContext.png)
+
+## Cookie
+
+- Cookie是服务器通知客户端保存键值对的一种技术。
+- 客户端有了Cookie后，每次请求都发送给服务器。
+- 每个cookie的大小不能超过4kb
+
+### Cookie的创建
+
+```java
+     Cookie cookie = new Cookie("key1","value1");
+     resp.addCookie(cookie);
+     resp.getWriter().write("Cookie create is ok");
+```
+
+![](resource\Cookie.png)
+
+### Cookie获取
+
+```
+req.getCookies()//获取服务器客户端的Cookie
+```
+
+### Cookie生命控制
+
+```
+cookie.setMaxAge(-1)//设置存活时间，为session,浏览器一关，立马删除
+```
+
+## Session
+
+- session是一个接口，会话，用来维护客户端和服务器关联的一种技术。
+- 每个客户端都有自己的一个Session会话。
+- 用来保存用户登录后的信息。
+
+```java
+//第一次调用创建Session会话，之后调用都是获取前面创建好的Session会话。
+request.getSession()
+```
+
+![](resource\session.png)
+
+### Session和Cookie的区别
+
+![](resource\Cookie&Session.png)
