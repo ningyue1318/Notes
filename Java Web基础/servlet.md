@@ -108,3 +108,15 @@ request.getSession()
 ### Session和Cookie的区别
 
 ![](resource\Cookie&Session.png)
+
+# Filter
+
+- Filter过滤器是JavaWeb三大组件之一，三大组件分别是Servlet程序、Listener监听器、Filter过滤器。
+- Filter是JAVAEE规范，也就是接口，作用是拦截请求，过滤响应。
+- 应用场景，权限检查，日记操作，事物管理
+
+# Filter&AOP&Interceptor区别
+
+- Filter过滤器：拦截Web访问URL地址，是Servlet规范，基于职责链
+- Interceptor:SpringMVC中概念，基于代理。
+- 两者都是AOP的实现
