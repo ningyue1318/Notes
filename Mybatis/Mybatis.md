@@ -333,3 +333,192 @@ SQL 映射文件只有很少的几个顶级元素（按照应被定义的顺序�
 ​		返回多个对象
 
 ![](resource\多个对象的Map.png)
+
+3. 级联查询
+
+   当属性里面包含对象的时候，采用级联查询来封装结果。
+
+   ```xml
+       <select id="getKeyById" resultMap="myKey">
+         select k.id,k.keyname,k.lockid,l.id lid,l.lockName from t_key k LEFT JOIN t_lock l
+          on k.id=l.id WHERE k.id=#{id}
+       </select>
+   
+   
+       <resultMap id="myKey" type="com.syn.bean.Key">
+           <id property="id" column="id"/>
+           <result property="keyName" column="keyname"/>
+           <result property="lock.id" column="lid"/>
+           <result property="lock.lockName" column="lockName"/>
+       </resultMap>
+   
+   使用级联属性也可以封装，封装一个对象
+   
+       <resultMap id="myKey" type="com.syn.bean.Key">
+           <id property="id" column="id"/>
+           <result property="keyName" column="keyname"/>
+           <association property="lock" javaType="com.syn.bean.Lock">
+               <id property="id" column="ld"/>
+               <result property="lockName" column="lockName"/>
+           </association>
+       </resultMap>
+   ```
+
+   ![](resource\级联查询.png)
+
+   当属性里包含集合的时候，使用collection标签
+
+   ```xml
+       <select id="getLockById" resultMap="myLock">
+           select k.id,k.keyname,k.lockid,l.id lid,l.lockName from t_key k LEFT JOIN t_lock l
+          on k.lockid=l.id WHERE l.id=#{id}
+       </select>
+   
+       <resultMap id="myLock" type="com.syn.bean.Lock">
+           <id property="id" column="lid"/>
+           <result property="lockName" column="lockName"/>
+           <collection property="keys" ofType="com.syn.bean.Key">
+               <id property="id" column="id"/>
+               <result property="keyName" column="keyname"/>
+           </collection>
+       </resultMap>
+   ```
+
+4. 分步查询
+
+   查询key表的lockid对应的lockname，连接查询
+
+   ![](resource\key-lock表.png)
+
+   ![](resource\分步查询.png)
+
+### resultMap
+
+```java
+//User的命名规则，
+public class User {
+  private int id;
+  private String username;
+  private String hashedPassword;
+}
+//数据库中对应的列名分别为，user_id,user_name,hashed_password。为了让查询出来的结果自动封装进去，设置resultMap进行名称映射。
+```
+
+```xml
+id属性指定主键，result指定其他列
+<resultMap id="userResultMap" type="User">
+  <id property="id" column="user_id" />
+  <result property="username" column="user_name"/>
+  <result property="password" column="hashed_password"/>
+</resultMap>
+
+查询方式
+<select id="selectUsers" resultMap="userResultMap">
+  select user_id, user_name, hashed_password
+  from some_table
+  where id = #{id}
+</select>
+```
+
+## 动态SQL
+
+### if标签
+
+```xml
+ <select id="getTeacherByCondition" resultMap="teacherMap">
+          select * from t_teacher where
+          <if test="id!=null">
+              id>#{id} and
+          </if>
+        <if test="name!=null">
+            teacherName like #{name} and
+        </if>
+        <if test="birth!=null">
+            birth_date>#{birth}
+        </if>
+    </select>
+```
+
+### where标签
+
+自动去除前面的and，如果条件不符合
+
+### for-each标签
+
+用来遍历集合，collections需要用@Param指定变量名，item是遍历的变量，separator是遍历的分隔符，open，close是开始关闭的标签
+
+![](resource\for-each标签.png)
+
+```xml
+   <select id="getTeacherByIdIn" resultMap="teacherMap">
+        select * from t_teacher where id IN
+        <foreach collection="ids" item="id_item" separator="," open="(" close=")">
+            #{id_item}
+        </foreach>
+    </select>
+```
+
+### set和if标签动态更新
+
+```xml
+ <update id="updateTeacher">
+        UPDATE t_teacher
+        <set>
+            <if test="name!=null">
+                teacherName = #{name},
+            </if>
+            <if test="course!=null">
+                class_name = #{course},
+            </if>
+            <if test="address!=null">
+                address = #{address},
+            </if>
+            <if test="birth!=null">
+                birth = #{birth}
+            </if>
+        </set>
+        <where>
+            id=#{id}
+        </where>
+    </update>
+```
+
+![](resource\Update.png)
+
+## 缓存
+
+- 暂时的存储一些数据，加快系统的查询速度
+
+- 一级缓存：线程级别的缓存，本地缓存，SqlSession级别的缓存
+
+  只要之前查询过的数据，mybatis就会保存在一个缓存中（Map），下次获取直接从缓存中拿。
+
+  ![](resource\一级缓存.png)
+
+  缓存失效的几种情况
+
+  1.  不同的sqlSession，使用不同的一级缓存。
+
+  2. 同一个方法不同的参数，由于之前可能没查过，所以还会发新的sql
+
+  3. 在sqlSession期间执行任何一次增删改操作，增删改操作会把缓存清空
+
+  4. 清空当前sqlSession的一级缓存，clearCache()方法
+
+  每次查询，先看一级缓存有没有，没有就发送新的sql，每个sqlSession拥有自己的缓存
+
+- 二级缓存：全局范围的缓存，出国当前线程，SqlSession能用外也可以用。SqlSession关闭或者提交之后，一级缓存的数据会放在二级缓存中，默认没有使用，需要开启
+
+  ```xml
+  //开启二级缓存的开关
+  <setting name="cacheEnabled" value="true"/>
+  //配置某个dao.xml文件，在需要缓存的地方加上下面的话
+  <cache></cache>
+  ```
+
+一级缓存和二级缓存不会同时出现一个数据
+
+二级缓存中，一级缓存关闭就有了
+
+二级缓存中没有数据，就会看一级缓存，一级缓存也没有，就会查询数据库
+
