@@ -169,7 +169,7 @@
 
 MyBatis 在设置预处理语句（PreparedStatement）中的参数或从结果集中取出一个值时， 都会用类型处理器将获取到的值以合适的方式转换成 Java 类型。下表描述了一些默认的类型处理器。
 
-![](resource\typeHandler.png)
+<img src="resource\typeHandler.png" style="zoom:80%;" />
 
 ### plugins
 
@@ -269,11 +269,11 @@ SQL 映射文件只有很少的几个顶级元素（按照应被定义的顺序�
   timeout="20">
 ```
 
-![](resource\insert&update&delete.png)
+<img src="resource\insert&update&delete.png" style="zoom:80%;" />
 
 - useGeneratedKeys和KeyProperty可以用来设置自增的ID
 
-![](resource\自增ID.png)
+<img src="resource\自增ID.png" style="zoom:80%;" />
 
 - 不支持自增的条件下，设置ID
 
@@ -306,7 +306,7 @@ SQL 映射文件只有很少的几个顶级元素（按照应被定义的顺序�
    public Employee getEmpByIdAndEmpName(@Param("id") Integer id, @Param("empName") String empName);
   ```
 
-  ![](resource\绑定错误异常.png)
+  <img src="resource\绑定错误异常.png" style="zoom:80%;" />
 
 3. 传入pojo，取值#{pojo的属性名}
 4. 传入map：将要使用的参数封装起来
@@ -322,17 +322,17 @@ SQL 映射文件只有很少的几个顶级元素（按照应被定义的顺序�
 
 1. 查询结果返回一个List
 
-   ![](resource\返回值是List.png)
+   <img src="resource\返回值是List.png" style="zoom:80%;" />
 
 2. 查询返回一个Map
 
    ​	返回单个map对象
 
-![](resource\单个对象Map.png)
+<img src="resource\单个对象Map.png" style="zoom:80%;" />
 
 ​		返回多个对象
 
-![](resource\多个对象的Map.png)
+<img src="resource\多个对象的Map.png" style="zoom:80%;" />
 
 3. 级联查询
 
@@ -364,7 +364,7 @@ SQL 映射文件只有很少的几个顶级元素（按照应被定义的顺序�
        </resultMap>
    ```
 
-   ![](resource\级联查询.png)
+   <img src="resource\级联查询.png" style="zoom:80%;" />
 
    当属性里包含集合的时候，使用collection标签
 
@@ -388,9 +388,9 @@ SQL 映射文件只有很少的几个顶级元素（按照应被定义的顺序�
 
    查询key表的lockid对应的lockname，连接查询
 
-   ![](resource\key-lock表.png)
+   <img src="resource\key-lock表.png" style="zoom:80%;" />
 
-   ![](resource\分步查询.png)
+   <img src="resource\分步查询.png" style="zoom:80%;" />
 
 ### resultMap
 
@@ -447,7 +447,7 @@ id属性指定主键，result指定其他列
 
 用来遍历集合，collections需要用@Param指定变量名，item是遍历的变量，separator是遍历的分隔符，open，close是开始关闭的标签
 
-![](resource\for-each标签.png)
+<img src="resource\for-each标签.png" style="zoom:80%;" />
 
 ```xml
    <select id="getTeacherByIdIn" resultMap="teacherMap">
@@ -483,7 +483,7 @@ id属性指定主键，result指定其他列
     </update>
 ```
 
-![](resource\Update.png)
+<img src="resource\Update.png" style="zoom:80%;" />
 
 ## 缓存
 
@@ -493,7 +493,7 @@ id属性指定主键，result指定其他列
 
   只要之前查询过的数据，mybatis就会保存在一个缓存中（Map），下次获取直接从缓存中拿。
 
-  ![](resource\一级缓存.png)
+  <img src="resource\一级缓存.png" style="zoom:80%;" />
 
   缓存失效的几种情况
 
