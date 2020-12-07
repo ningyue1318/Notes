@@ -32,7 +32,7 @@ public class MyServlet implements Servlet {
 }
 ```
 
-![](resource\servlet生命周期.png)
+<img src="resource\servlet生命周期.png" style="zoom:80%;" />
 
 ## Web目录
 
@@ -55,14 +55,14 @@ public class MyServlet implements Servlet {
 
 获取web.xml中servlet标签下的init-param的值
 
-![](resource\ServletConfig.png)
+<img src="resource\ServletConfig.png" style="zoom:80%;" />
 
 ## ServletContext
 
 - 当Tomcat启动的时候，创建一个ServletContext对象，代表当前web站点。
 - 所有的Servlet都共享一个ServletContext对象，
 
-![](resource\ServletContext.png)
+<img src="resource\ServletContext.png" style="zoom:80%;" />
 
 ## Cookie
 
@@ -78,7 +78,7 @@ public class MyServlet implements Servlet {
      resp.getWriter().write("Cookie create is ok");
 ```
 
-![](resource\Cookie.png)
+<img src="resource\Cookie.png" style="zoom:80%;" />
 
 ### Cookie获取
 
@@ -103,11 +103,11 @@ cookie.setMaxAge(-1)//设置存活时间，为session,浏览器一关，立马�
 request.getSession()
 ```
 
-![](resource\session.png)
+<img src="resource\session.png" style="zoom:80%;" />
 
 ### Session和Cookie的区别
 
-![](resource\Cookie&Session.png)
+<img src="resource\Cookie&Session.png" style="zoom:80%;" />
 
 # Filter
 

@@ -182,7 +182,7 @@
   <%= 表达式%>
   ```
 
-  ![](resource\jsp表达式.png)
+  <img src="resource\jsp表达式.png" style="zoom:80%;" />
 
 - 代码脚本，可以在jsp页面中编写自己需要的功能
 
@@ -204,7 +204,7 @@
 
 jsp中的内置对象，是指Tomcat在翻译jsp页面成为servlet源代码之后，内部提供的九大对象，叫内置对象。
 
-![](resource\jsp九大对象.png)
+<img src="resource\jsp九大对象.png" style="zoom:80%;" />
 
 - out对象主要设置缓存大小，是否自动刷新
 - request和response是servlet的对象
@@ -215,7 +215,7 @@ jsp中的内置对象，是指Tomcat在翻译jsp页面成为servlet源代码之�
 - exception是java中的Exception对象
 - pageContext是jsp页面编译后的内容，可以获取8个内置对象
 
- ![](resource\pageContext.png)
+ <img src="resource\pageContext.png" style="zoom:80%;" />
 
 ## jsp四大域对象
 
@@ -244,7 +244,7 @@ pageContext->request->session->application
 
 - EL表达式的全称是：Expression Language表达式语言。就是用下面的方式输出：
 
-  ![](resource\EL.png)
+  <img src="resource\EL.png" style="zoom:80%;" />
 
 - EL表达式的主要作用是替代jsp页面中的表达式脚本在jsp页面中进行数据的输出。
 
@@ -266,7 +266,7 @@ pageContext->request->session->application
 |      cookie      |  Map<String,Cookie>  |            当前cookie信息            |
 |    initParam     |  Map<String,String>  | web.xml中的<context-param>上下文参数 |
 
-  ![](resource\EL2.png)
+  <img src="resource\EL2.png" style="zoom:80%;" />
 
 # JSTL
 
@@ -281,7 +281,7 @@ pageContext->request->session->application
 
 ### c:set
 
-  ![](resource\jstl.png)
+  <img src="resource\jstl.png" style="zoom:80%;" />
 
 ###   c:choose
 
@@ -289,13 +289,13 @@ pageContext->request->session->application
 - 标签里不能使用html注释，要使用jsp注释
 -  
 
-![](resource\jstl-choose.png)
+<img src="resource\jstl-choose.png" style="zoom:80%;" />
 
 ### c:forEach
 
 - 遍历输出
 
-  ![](resource\jstl-foreach.png)
+  <img src="resource\jstl-foreach.png" style="zoom:80%;" />
 
 - 遍历数组
 

@@ -124,15 +124,15 @@ web中
 
 1. 直接在标签style属性上设置
 
-   ![](resource\html1.png)
+   <img src="resource\html1.png" style="zoom:80%;" />
 
 2. 在head标签中，使用style标签定义自己需要的css样式（同一页面复用）
 
-   ![](resource\html2.png)
+   <img src="resource\html2.png" style="zoom:80%;" />
 
 3. 把css标签写成一个单独的css文件，在通过link引入（所有文件复用）
 
-   ![](resource\html3.png)
+   <img src="resource\html3.png" style="zoom:80%;" />
 
 ## 选择器
 

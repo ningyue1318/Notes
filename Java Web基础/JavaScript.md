@@ -24,7 +24,7 @@ var 变量名
 
 - jQuery中的$是一个函数。
 
-  ![](resource\jQuery.png)
+  <img src="resource\jQuery.png" style="zoom:80%;" />
 
   1. 传入参数为函数时，表示页面加载完成之后，相当于window.onload = funcation(){}
 
