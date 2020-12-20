@@ -200,6 +200,12 @@ MyBatis 允许你在映射语句执行过程中的某一点进行拦截调用。
         </environments>
 ```
 
+其中的type分为三种情况
+
+- POOLED:采用传统的javax.sql.DataSource规范中的连接池，mybatis中有针对规范的实现
+- UNPOOLED:采用传统的获取连接的方式，虽然也实现了DataSource接口，但没有实现连接池的思想
+- JNDI：采用服务器提供的JNDI技术实现，来获取DataSource对象，不同的服务器拿到的DataSource是不一样的，不是web或者maven的war工程，是不能使用的。Tomcat中的连接池是dbcp连接池
+
 ### databaseIdProvider
 
 用来考虑数据库移植
