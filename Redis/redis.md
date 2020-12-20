@@ -12,35 +12,35 @@
 
 
 
-<img src="F:\学习资料\Nodes\Redis\resource\单机.png" style="zoom: 80%;" />
+<img src="resource\单机.png" style="zoom: 80%;" />
 
 2. Memcached缓存+MySQL+垂直拆分
 
    随着访问量增加开始出现性能问题，通过文件缓存来缓解数据库的压力。
 
-<img src="F:\学习资料\Nodes\Redis\resource\缓存.png" style="zoom:80%;" />
+<img src="resource\缓存.png" style="zoom:80%;" />
 
 3. MySQL主从分离
 
    由于数据库写入压力大，Memcached只能缓解数据库读取压力，读写集中在一个数据库上压力太大，使用读写分离提高扩展性
 
-<img src="F:\学习资料\Nodes\Redis\resource\主从分离.png" style="zoom:80%;" />
+<img src="resource\主从分离.png" style="zoom:80%;" />
 
 4. 分表分库+水平拆分+mysql集群
 
    随着数据写的压力瓶颈出现，开始使用集群解决
 
-   <img src="F:\学习资料\Nodes\Redis\resource\集群.png" style="zoom:80%;" />
+   <img src="resource\集群.png" style="zoom:80%;" />
 
 5. MySQL性能瓶颈
 
 6. 现状
 
-   <img src="F:\学习资料\Nodes\Redis\resource\现状.png" style="zoom:80%;" />
+   <img src="Redis\resource\现状.png" style="zoom:80%;" />
 
 # NoSQL数据库的分类
 
-<img src="F:\学习资料\Nodes\Redis\resource\4种NoSQL数据库.png" style="zoom:150%;" />
+<img src="resource\4种NoSQL数据库.png" style="zoom:150%;" />
 
 # 分布式数据库理论
 
@@ -52,7 +52,7 @@
 
 - 分区容错性（Partition Tolerance）：当节点间出现任意数量的消息丢失或高延迟的时候，系统仍然在继续工作。也就是说，分布式系统在告诉访问本系统的客户端：不管我的内部出现什么样的数据同步问题，我会一直运行。这个指标，强调的是集群对分区故障的容错能力。
 
-<img src="F:\学习资料\Nodes\Redis\resource\cap.png" style="zoom:80%;" />
+<img src="resource\cap.png" style="zoom:80%;" />
 
 - 当选择了一致性（C）的时候，一定会读到最新的数据，不会读到旧数据，但如果因为消息丢失、延迟过高发生了网络分区，那么这个时候，当集群节点接收到来自客户端的读请求时，为了不破坏一致性，可能会因为无法响应最新数据，而返回出错信息。
 - 当选择了可用性（A）的时候，系统将始终处理客户端的查询，返回特定信息，如果发生了网络分区，一些节点将无法返回最新的特定信息，它们将返回自己当前的相对新的信息。
