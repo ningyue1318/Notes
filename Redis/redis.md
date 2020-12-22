@@ -202,3 +202,37 @@ redis的作用
 - 劣势
   - 相同数据集的数据而言aof文件要远大于rdb文件，恢复速度慢于rdb
   - Aof运行效率要慢于rdb,每秒同步策略效率较好，不同步效率和rdb相同
+
+## 事务
+
+| 命令              | 描述                                                         |
+| ----------------- | ------------------------------------------------------------ |
+| DISCARD           | 取消事务，放弃执行事务块内的所有命令。                       |
+| EXEC              | 执行所有事务块内的命令。                                     |
+| MULTI             | 标记一个事务块的开始。                                       |
+| UNWATCH           | 取消 WATCH 命令对所有 key 的监视。                           |
+| WATCH key [key …] | 监视一个(或多个) key ，如果在事务执行之前这个(或这些) key 被其他命令所改动，那么事务将被打断。 |
+
+### 正常执行
+
+<img src="resource\正常执行.png" style="zoom:80%;" />
+
+### 放弃事务
+
+<img src="resource\放弃事务.png" style="zoom:80%;" />
+
+### 全体连坐
+
+<img src="resource\全体连坐.png" style="zoom:80%;" />
+
+### 冤有头债有主
+
+<img src="resource\冤有头债有主.png" style="zoom:80%;" />
+
+### WATCH
+
+<img src="resource\watch无加塞.png" style="zoom:80%;" />
+
+<img src="resource\watch有加塞失败.png" style="zoom:80%;" />
+
+## 主从复制
