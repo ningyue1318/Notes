@@ -1121,9 +1121,8 @@ spring:
 
 - - **contentNegotiationManager 内容协商管理器 默认使用基于请求头的策略**
   
-    
   - **HeaderContentNegotiationStrategy  确定客户端可以接收的内容类型** 
-
+  
 - 3、遍历循环所有当前系统的 **MessageConverter**，看谁支持操作这个对象（Person）
 - 4、找到支持操作Person的converter，把converter支持的媒体类型统计出来。
 - 5、客户端需要【application/xml】。服务端能力【10种、json、xml】
@@ -1174,86 +1173,59 @@ SpringMVC的什么功能。一个入口给容器中添加一个  WebMvcConfigure
 
 
 
-# 5、视图解析与模板引擎
+# 5.视图解析与模板引擎
 
 视图解析：**SpringBoot默认不支持 JSP，需要引入第三方模板引擎技术实现页面渲染。**
 
-## 1、视图解析
+## 1.视图解析
 
-![img](https://cdn.nlark.com/yuque/0/2020/png/1354552/1606043749039-cefbf687-4feb-441d-bad8-c6d933248d3c.png)
+<img src="resource\视图解析.png" style="zoom:80%;" />
 
-### 1、视图解析原理流程
+### 1.视图解析原理流程
 
-1、目标方法处理的过程中，所有数据都会被放在 **ModelAndViewContainer 里面。包括数据和视图地址**
+1.目标方法处理的过程中，所有数据都会被放在 **ModelAndViewContainer 里面。包括数据和视图地址**
 
-**2、方法的参数是一个自定义类型对象（从请求参数中确定的），把他重新放在** **ModelAndViewContainer** 
+**2.方法的参数是一个自定义类型对象（从请求参数中确定的），把他重新放在** **ModelAndViewContainer** 
 
-**3、任何目标方法执行完成以后都会返回 ModelAndView（****数据和视图地址****）。**
+**3.任何目标方法执行完成以后都会返回 ModelAndView（数据和视图地址**）。
 
-**4、****processDispatchResult  处理派发结果（页面改如何响应）**
+**4.processDispatchResult  处理派发结果（页面改如何响应)**
 
-- 1、**render**(**mv**, request, response); 进行页面渲染逻辑
+- 1.**render**(**mv**, request, response); 进行页面渲染逻辑
 
 - - 1、根据方法的String返回值得到 **View** 对象【定义了页面的渲染逻辑】
 
-- - - 1、所有的视图解析器尝试是否能根据当前返回值得到**View**对象
-    - 2、得到了  **redirect:/main.html** --> Thymeleaf new **RedirectView**()
-    - 3、ContentNegotiationViewResolver 里面包含了下面所有的视图解析器，内部还是利用下面所有视图解析器得到视图对象。
-    - 4、view.render(mv.getModelInternal(), request, response);  视图对象调用自定义的render进行页面渲染工作
-
+- - - 1.所有的视图解析器尝试是否能根据当前返回值得到**View**对象
+    
+    - 2.得到了  **redirect:/main.html** --> Thymeleaf new **RedirectView**()
+    
+    <img src="resource\ViewResolver.png" style="zoom:60%;" />
+    
+    - 3.ContentNegotiationViewResolver 里面包含了下面所有的视图解析器，内部还是利用下面所有视图解析器得到视图对象。
+    
+    - 4.view.render(mv.getModelInternal(), request, response);  视图对象调用自定义的render进行页面渲染工作
+  
 - - - - **RedirectView 如何渲染【重定向到一个页面】**
       - **1、获取目标url地址**
-      - **2、****response.sendRedirect(encodedURL);**
-
-
-
-
+      - **2、response.sendRedirect(encodedURL);**
 
 **视图解析：**
 
-- - **返回值以 forward: 开始： new InternalResourceView(forwardUrl); -->  转发****request.getRequestDispatcher(path).forward(request, response);** 
+- - **返回值以 forward: 开始： new InternalResourceView(forwardUrl); -->  转发request.getRequestDispatcher(path).forward(request, response);**
   - **返回值以** **redirect: 开始：** **new RedirectView() --》 render就是重定向** 
   - **返回值是普通字符串： new ThymeleafView（）--->** 
 
+## 2.模板引擎-Thymeleaf
 
-
-
-
-自定义视图解析器+自定义视图； **大厂学院。**
-
-
-
-
-
-
-
-
-
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1354552/1605680247945-088b0f17-185c-490b-8889-103e8b4d8c07.png)
-
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1354552/1605679959020-54b96fe7-f2fc-4b4d-a392-426e1d5413de.png)
-
-
-
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1354552/1605679471537-7db702dc-b165-4dc6-b64a-26459ee5fd6c.png)
-
-
-
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1354552/1605679913592-151a616a-c754-4da3-a2c1-91dc0230a48d.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_10%2Ctext_YXRndWlndS5jb20g5bCa56GF6LC3%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
-
-## 2、模板引擎-Thymeleaf
-
-### 1、thymeleaf简介
+### 1.thymeleaf简介
 
 Thymeleaf is a modern server-side Java template engine for both web and standalone environments, capable of processing HTML, XML, JavaScript, CSS and even plain text.
 
 **现代化、服务端Java模板引擎**
 
+### 2.基本语法
 
-
-### 2、基本语法
-
-#### 1、表达式
+#### 1.表达式
 
 | 表达式名字 | 语法   | 用途                               |
 | ---------- | ------ | ---------------------------------- |
@@ -1263,9 +1235,7 @@ Thymeleaf is a modern server-side Java template engine for both web and standalo
 | 链接       | @{...} | 生成链接                           |
 | 片段表达式 | ~{...} | jsp:include 作用，引入公共页面片段 |
 
-
-
-#### 2、字面量
+#### 2.字面量
 
 文本值: **'one text'** **,** **'Another one!'** **,…**数字: **0** **,** **34** **,** **3.0** **,** **12.3** **,…**布尔值: **true** **,** **false**
 
@@ -1273,38 +1243,27 @@ Thymeleaf is a modern server-side Java template engine for both web and standalo
 
 变量： one，two，.... 变量不能有空格
 
-#### 3、文本操作
+#### 3.文本操作
 
 字符串拼接: **+**
 
 变量替换: **|The name is ${name}|** 
 
-
-
 #### 4、数学运算
 
 运算符: + , - , * , / , %
 
-
-
-#### 5、布尔运算
+#### 5.布尔运算
 
 运算符:  **and** **,** **or**
 
 一元运算: **!** **,** **not** 
 
-**
-**
-
-
-
-#### 6、比较运算
+#### 6.比较运算
 
 比较: **>** **,** **<** **,** **>=** **,** **<=** **(** **gt** **,** **lt** **,** **ge** **,** **le** **)**等式: **==** **,** **!=** **(** **eq** **,** **ne** **)** 
 
-
-
-#### 7、条件运算
+#### 7.条件运算
 
 If-then: **(if) ? (then)**
 
@@ -1312,21 +1271,15 @@ If-then-else: **(if) ? (then) : (else)**
 
 Default: (value) **?: (defaultvalue)** 
 
-
-
-#### 8、特殊操作
+#### 8.特殊操作
 
 无操作： _
 
-
-
-
-
-### 3、设置属性值-th:attr
+### 3.设置属性值-th:attr
 
 设置单个值
 
-```
+```xml
 <form action="subscribe.html" th:attr="action=@{/subscribe}">
   <fieldset>
     <input type="text" name="email" />
@@ -1337,30 +1290,24 @@ Default: (value) **?: (defaultvalue)**
 
 设置多个值
 
-```
+```xml
 <img src="../../images/gtvglogo.png"  th:attr="src=@{/images/gtvglogo.png},title=#{logo},alt=#{logo}" />
 ```
 
-
-
 以上两个的代替写法 th:xxxx
 
-```
+```xml
 <input type="submit" value="Subscribe!" th:value="#{subscribe.submit}"/>
 <form action="subscribe.html" th:action="@{/subscribe}">
 ```
-
-
 
 所有h5兼容的标签写法
 
 https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html#setting-value-to-specific-attributes
 
+### 4.迭代
 
-
-### 4、迭代
-
-```
+```xml
 <tr th:each="prod : ${prods}">
         <td th:text="${prod.name}">Onions</td>
         <td th:text="${prod.price}">2.41</td>
@@ -1370,7 +1317,7 @@ https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html#setting-value-to
 
 
 
-```
+```xml
 <tr th:each="prod,iterStat : ${prods}" th:class="${iterStat.odd}? 'odd'">
   <td th:text="${prod.name}">Onions</td>
   <td th:text="${prod.price}">2.41</td>
@@ -1378,19 +1325,15 @@ https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html#setting-value-to
 </tr>
 ```
 
+### 5.条件运算
 
-
-### 5、条件运算
-
-```
+```xml
 <a href="comments.html"
 th:href="@{/product/comments(prodId=${prod.id})}"
 th:if="${not #lists.isEmpty(prod.comments)}">view</a>
 ```
 
-
-
-```
+```xml
 <div th:switch="${user.role}">
   <p th:case="'admin'">User is an administrator</p>
   <p th:case="#{roles.manager}">User is a manager</p>
@@ -1398,36 +1341,30 @@ th:if="${not #lists.isEmpty(prod.comments)}">view</a>
 </div>
 ```
 
-#  
+### 6.属性优先级
 
-### 6、属性优先级
+<img src="resource\属性优先级.png" style="zoom:80%;" />
 
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1354552/1605498132699-4fae6085-a207-456c-89fa-e571ff1663da.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_14%2Ctext_YXRndWlndS5jb20g5bCa56GF6LC3%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10%2Fresize%2Cw_1500)
+## 3.thymeleaf使用
 
-#  
+#### 1.引入Starter
 
-## 3、thymeleaf使用
-
-#### 1、引入Starter
-
-```
+```xml
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
 ```
 
-#### 2、自动配置好了thymeleaf
+#### 2.自动配置好了thymeleaf
 
-```
+```java
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(ThymeleafProperties.class)
 @ConditionalOnClass({ TemplateMode.class, SpringTemplateEngine.class })
 @AutoConfigureAfter({ WebMvcAutoConfiguration.class, WebFluxAutoConfiguration.class })
 public class ThymeleafAutoConfiguration { }
 ```
-
-#  
 
 自动配好的策略
 
@@ -1436,15 +1373,15 @@ public class ThymeleafAutoConfiguration { }
 - **3、配好了** **ThymeleafViewResolver** 
 - 4、我们只需要直接开发页面
 
-```
+```java
     public static final String DEFAULT_PREFIX = "classpath:/templates/";
 
     public static final String DEFAULT_SUFFIX = ".html";  //xxx.html
 ```
 
-#### 3、页面开发
+#### 3.页面开发
 
-```
+```xml
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -1461,91 +1398,13 @@ public class ThymeleafAutoConfiguration { }
 </html>
 ```
 
-## 4、构建后台管理系统
-
-### 1、项目创建
-
-thymeleaf、web-starter、devtools、lombok
 
 
+# 6.拦截器
 
-### 2、静态资源处理
+## 1.HandlerInterceptor 接口
 
-自动配置好，我们只需要把所有静态资源放到 static 文件夹下
-
-### 3、路径构建
-
-th:action="@{/login}"
-
-
-
-### 4、模板抽取
-
-th:insert/replace/include
-
-
-
-### 5、页面跳转
-
-```
-    @PostMapping("/login")
-    public String main(User user, HttpSession session, Model model){
-
-        if(StringUtils.hasLength(user.getUserName()) && "123456".equals(user.getPassword())){
-            //把登陆成功的用户保存起来
-            session.setAttribute("loginUser",user);
-            //登录成功重定向到main.html;  重定向防止表单重复提交
-            return "redirect:/main.html";
-        }else {
-            model.addAttribute("msg","账号密码错误");
-            //回到登录页面
-            return "login";
-        }
-
-    }
-```
-
-
-
-### 6、数据渲染
-
-```
-    @GetMapping("/dynamic_table")
-    public String dynamic_table(Model model){
-        //表格内容的遍历
-        List<User> users = Arrays.asList(new User("zhangsan", "123456"),
-                new User("lisi", "123444"),
-                new User("haha", "aaaaa"),
-                new User("hehe ", "aaddd"));
-        model.addAttribute("users",users);
-
-        return "table/dynamic_table";
-    }
-        <table class="display table table-bordered" id="hidden-table-info">
-        <thead>
-        <tr>
-            <th>#</th>
-            <th>用户名</th>
-            <th>密码</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr class="gradeX" th:each="user,stats:${users}">
-            <td th:text="${stats.count}">Trident</td>
-            <td th:text="${user.userName}">Internet</td>
-            <td >[[${user.password}]]</td>
-        </tr>
-        </tbody>
-        </table>
-```
-
-
-
-# 6、拦截器
-
-## 1、HandlerInterceptor 接口
-
-```
+```java
 /**
  * 登录检查
  * 1、配置好拦截器要拦截哪些请求
@@ -1613,11 +1472,9 @@ public class LoginInterceptor implements HandlerInterceptor {
 }
 ```
 
-
-
 ## 2、配置拦截器
 
-```
+```java
 /**
  * 1、编写一个拦截器实现HandlerInterceptor接口
  * 2、拦截器注册到容器中（实现WebMvcConfigurer的addInterceptors）
@@ -1634,8 +1491,6 @@ public class AdminWebConfig implements WebMvcConfigurer {
     }
 }
 ```
-
-
 
 ## 3、拦截器原理
 
@@ -1656,13 +1511,11 @@ public class AdminWebConfig implements WebMvcConfigurer {
 
 7、页面成功渲染完成以后，也会倒序触发 afterCompletion
 
-
-
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1354552/1605764129365-5b31a748-1541-4bee-9692-1917b3364bc6.png?x-oss-process=image%2Fresize%2Cw_1500)
+<img src="resource\处理器.png" style="zoom:60%;" />
 
 
 
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1354552/1605765121071-64cfc649-4892-49a3-ac08-88b52fb4286f.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_10%2Ctext_YXRndWlndS5jb20g5bCa56GF6LC3%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+<img src="resource\拦截器.png" style="zoom:60%;" />
 
 
 
