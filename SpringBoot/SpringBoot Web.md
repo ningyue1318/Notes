@@ -1519,24 +1519,20 @@ public class AdminWebConfig implements WebMvcConfigurer {
 
 
 
-# 7、文件上传
+# 7.文件上传
 
-## 1、页面表单
+## 1.页面表单
 
-```
+```xml
 <form method="post" action="/upload" enctype="multipart/form-data">
     <input type="file" name="file"><br>
     <input type="submit" value="提交">
 </form>
 ```
 
+## 2.文件上传代码
 
-
-## 2、文件上传代码
-
-
-
-```
+```java
     /**
      * MultipartFile 自动封装上传过来的文件
      * @param email
@@ -1574,20 +1570,20 @@ public class AdminWebConfig implements WebMvcConfigurer {
     }
 ```
 
-## 3、自动配置原理
+## 3.自动配置原理
 
-**文件上传自动配置类-MultipartAutoConfiguration-****MultipartProperties**
+**文件上传自动配置类-MultipartAutoConfiguration-MultipartProperties**
 
 - 自动配置好了 **StandardServletMultipartResolver  【文件上传解析器】**
 - **原理步骤**
 
-- - **1、请求进来使用文件上传解析器判断（**isMultipart**）并封装（**resolveMultipart，**返回**MultipartHttpServletRequest**）文件上传请求**
-  - **2、参数解析器来解析请求中的文件内容封装成MultipartFile**
+- - **1、请求进来使用文件上传解析器判断（isMultipart）并封装（resolveMultipart，返回MultipartHttpServletRequest）文件上传请求**
+  - **2、参数解析器(RequestPartMethodArgumentResolver)来解析请求中的文件内容封装成MultipartFile**
   - **3、将request中文件信息封装为一个Map；**MultiValueMap<String, MultipartFile>
 
 **FileCopyUtils**。实现文件流的拷贝
 
-```
+```xml
     @PostMapping("/upload")
     public String upload(@RequestParam("email") String email,
                          @RequestParam("username") String username,
@@ -1595,39 +1591,129 @@ public class AdminWebConfig implements WebMvcConfigurer {
                          @RequestPart("photos") MultipartFile[] photos)
 ```
 
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1354552/1605847414866-32b6cc9c-5191-4052-92eb-069d652dfbf9.png)
+# 8.异常处理
 
-# 8、异常处理
+## 1.错误处理
 
-## 1、错误处理
-
-#### 1、默认规则
+#### 1.默认规则
 
 - 默认情况下，Spring Boot提供`/error`处理所有错误的映射
 - 对于机器客户端，它将生成JSON响应，其中包含错误，HTTP状态和异常消息的详细信息。对于浏览器客户端，响应一个“ whitelabel”错误视图，以HTML格式呈现相同的数据
-- ![image.png](https://cdn.nlark.com/yuque/0/2020/png/1354552/1606024421363-77083c34-0b0e-4698-bb72-42da351d3944.png)![image.png](https://cdn.nlark.com/yuque/0/2020/png/1354552/1606024616835-bc491bf0-c3b1-4ac3-b886-d4ff3c9874ce.png)
-- **要对其进行自定义，添加****`View`****解析为`error```**
+- <img src="resource\错误响应.png" style="zoom:60%;" />
+- **要对其进行自定义，添加View解析为error**
 - 要完全替换默认行为，可以实现 `ErrorController `并注册该类型的Bean定义，或添加`ErrorAttributes类型的组件`以使用现有机制但替换其内容。
 - error/下的4xx，5xx页面会被自动解析；
 
-- - ![image.png](https://cdn.nlark.com/yuque/0/2020/png/1354552/1606024592756-d4ab8a6b-ec37-426b-8b39-010463603d57.png)
 
-#### 2、定制错误处理逻辑
+#### 2.定制错误处理逻辑
 
 - 自定义错误页
 
-- - error/404.html  error/5xx.html；有精确的错误状态码页面就匹配精确，没有就找 4xx.html；如果都没有就触发白页
+- error/404.html  error/5xx.html；有精确的错误状态码页面就匹配精确，没有就找 4xx.html；如果都没有就触发白页
 
 - @ControllerAdvice+@ExceptionHandler处理全局异常；底层是 **ExceptionHandlerExceptionResolver 支持的**
+
+  ```java
+  @ControllerAdvice
+  public class GlobalExceptionHandler {
+  
+      @ExceptionHandler({ArithmeticException.class,NullPointerException.class})
+      public String handleArithException(Exception e){
+          System.out.println("异常是"+e);
+          return "login";
+      }
+  }
+  ```
+
 - @ResponseStatus+自定义异常 ；底层是 **ResponseStatusExceptionResolver ，把responsestatus注解的信息底层调用** **response.sendError(statusCode, resolvedReason)；tomcat发送的/error**
+
+  ```java
+  @ResponseStatus(value = HttpStatus.FORBIDDEN,reason = "用户数量太多")
+  public class UserTooManyException extends RuntimeException{
+  
+      public UserTooManyException(){}
+  
+      public UserTooManyException(String message){
+          super(message);
+      }
+  }
+  
+  用的时候，直接抛出
+  ```
+
 - Spring底层的异常，如 参数类型转换异常；**DefaultHandlerExceptionResolver 处理框架底层的异常。**
 
+  ```java
+  //默认处理异常
+  		try {
+  			if (ex instanceof HttpRequestMethodNotSupportedException) {
+  				return handleHttpRequestMethodNotSupported(
+  						(HttpRequestMethodNotSupportedException) ex, request, response, handler);
+  			}
+  			else if (ex instanceof HttpMediaTypeNotSupportedException) {
+  				return handleHttpMediaTypeNotSupported(
+  						(HttpMediaTypeNotSupportedException) ex, request, response, handler);
+  			}
+  			else if (ex instanceof HttpMediaTypeNotAcceptableException) {
+  				return handleHttpMediaTypeNotAcceptable(
+  						(HttpMediaTypeNotAcceptableException) ex, request, response, handler);
+  			}
+  			else if (ex instanceof MissingPathVariableException) {
+  				return handleMissingPathVariable(
+  						(MissingPathVariableException) ex, request, response, handler);
+  			}
+  			else if (ex instanceof MissingServletRequestParameterException) {
+  				return handleMissingServletRequestParameter(
+  						(MissingServletRequestParameterException) ex, request, response, handler);
+  			}
+  			else if (ex instanceof ServletRequestBindingException) {
+  				return handleServletRequestBindingException(
+  						(ServletRequestBindingException) ex, request, response, handler);
+  			}
+  			else if (ex instanceof ConversionNotSupportedException) {
+  				return handleConversionNotSupported(
+  						(ConversionNotSupportedException) ex, request, response, handler);
+  			}
+  			else if (ex instanceof TypeMismatchException) {
+  				return handleTypeMismatch(
+  						(TypeMismatchException) ex, request, response, handler);
+  			}
+  			else if (ex instanceof HttpMessageNotReadableException) {
+  				return handleHttpMessageNotReadable(
+  						(HttpMessageNotReadableException) ex, request, response, handler);
+  			}
+  			else if (ex instanceof HttpMessageNotWritableException) {
+  				return handleHttpMessageNotWritable(
+  						(HttpMessageNotWritableException) ex, request, response, handler);
+  			}
+  			else if (ex instanceof MethodArgumentNotValidException) {
+  				return handleMethodArgumentNotValidException(
+  						(MethodArgumentNotValidException) ex, request, response, handler);
+  			}
+  			else if (ex instanceof MissingServletRequestPartException) {
+  				return handleMissingServletRequestPartException(
+  						(MissingServletRequestPartException) ex, request, response, handler);
+  			}
+  			else if (ex instanceof BindException) {
+  				return handleBindException((BindException) ex, request, response, handler);
+  			}
+  			else if (ex instanceof NoHandlerFoundException) {
+  				return handleNoHandlerFoundException(
+  						(NoHandlerFoundException) ex, request, response, handler);
+  			}
+  			else if (ex instanceof AsyncRequestTimeoutException) {
+  				return handleAsyncRequestTimeoutException(
+  						(AsyncRequestTimeoutException) ex, request, response, handler);
+  			}
+  		}
+  ```
+
 - - response.sendError(HttpServletResponse.**SC_BAD_REQUEST**, ex.getMessage()); 
-  - ![image.png](https://cdn.nlark.com/yuque/0/2020/png/1354552/1606114118010-f4aaf5ee-2747-4402-bc82-08321b2490ed.png)
+  - <img src="resource\原生错误页.png" style="zoom:80%;" />
 
 - 自定义实现 HandlerExceptionResolver 处理异常；可以作为默认的全局异常处理规则
 
-- - ![image.png](https://cdn.nlark.com/yuque/0/2020/png/1354552/1606114688649-e6502134-88b3-48db-a463-04c23eddedc7.png)
+  <img src="resource\自定义异常.png" style="zoom:80%;" />
 
 - **ErrorViewResolver**  实现自定义处理异常；
 
@@ -1635,11 +1721,7 @@ public class AdminWebConfig implements WebMvcConfigurer {
   - 你的异常没有任何人能处理。tomcat底层 response.sendError。error请求就会转给controller
   - **basicErrorController 要去的页面地址是** **ErrorViewResolver**  ；
 
-
-
-
-
-#### 3、异常处理自动配置原理
+#### 3.异常处理自动配置原理
 
 - **ErrorMvcAutoConfiguration  自动配置异常处理规则**
 
@@ -1647,79 +1729,82 @@ public class AdminWebConfig implements WebMvcConfigurer {
 
 - - - **public class** **DefaultErrorAttributes** **implements** **ErrorAttributes**, **HandlerExceptionResolver**
     - **DefaultErrorAttributes**：定义错误页面中可以包含哪些数据。
-    - ![image.png](https://cdn.nlark.com/yuque/0/2020/png/1354552/1606044430037-8d599e30-1679-407c-96b7-4df345848fa4.png)
-    - ![image.png](https://cdn.nlark.com/yuque/0/2020/png/1354552/1606044487738-8cb1dcda-08c5-4104-a634-b2468512e60f.png)
+    - <img src="resource\DefaultAttributes1.png" style="zoom:60%;" />
+    - <img src="resource\DefaultAttribute2.png" style="zoom:60%;" />
 
-- - **容器中的组件：类型：****BasicErrorController --> id：basicErrorController（json+白页 适配响应）**
+- - **容器中的组件：类型：**BasicErrorController --> id：basicErrorController（json+白页 适配响应）
+
+    ​      如果想要返回页面；就会找error视图【**StaticView**】。(默认是一个白页)
+
+    <img src="resource\白叶错误页面.png" style="zoom:60%;" />
 
 - - - **处理默认** **/error 路径的请求；页面响应** **new** ModelAndView(**"error"**, model)；
+    
     - **容器中有组件 View**->**id是error**；（响应默认错误页）
+  
     - 容器中放组件 **BeanNameViewResolver（视图解析器）；按照返回的视图名作为组件的id去容器中找View对象。**
-
+    
+      <img src="resource\错误页.png" style="zoom:60%;" />
+  
 - - **容器中的组件：**类型：**DefaultErrorViewResolver -> id：**conventionErrorViewResolver
 
 - - - 如果发生错误，会以HTTP的状态码 作为视图页地址（viewName），找到真正的页面
+    
     - error/404、5xx.html
+    
+      <img src="resource\DefaultErrorViewResolver.png" style="zoom:60%;" />
 
+#### 4.异常处理步骤流程
 
+1.执行目标方法，目标方法运行期间有任何异常都会被catch、而且标志当前请求结束；并且用 **dispatchException** 
 
-如果想要返回页面；就会找error视图【**StaticView**】。(默认是一个白页)
-
-
-
-
-
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1354552/1606043870164-3770e116-344f-448e-8bff-8f32438edc9a.png)写出去json
-
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1354552/1606043904074-50b7f088-2d2b-4da5-85e2-0a756da74dca.png) 错误页
-
-
-
-
-
-#### 4、异常处理步骤流程
-
-1、执行目标方法，目标方法运行期间有任何异常都会被catch、而且标志当前请求结束；并且用 **dispatchException** 
-
-2、进入视图解析流程（页面渲染？） 
+2.进入视图解析流程（页面渲染） 
 
 processDispatchResult(processedRequest, response, mappedHandler, **mv**, **dispatchException**);
 
-3、**mv** = **processHandlerException**；处理handler发生的异常，处理完成返回ModelAndView；
+3.**mv** = **processHandlerException**；处理handler发生的异常，处理完成返回ModelAndView；
 
-- 1、遍历所有的 **handlerExceptionResolvers，看谁能处理当前异常【****HandlerExceptionResolver处理器异常解析器****】**
-- **![image.png](https://cdn.nlark.com/yuque/0/2020/png/1354552/1606047252166-ce71c3a1-0e0e-4499-90f4-6d80014ca19f.png)**
+- 1、遍历所有的 **handlerExceptionResolvers，看谁能处理当前异常【***HandlerExceptionResolver处理器异常解析器】
 - **2、系统默认的  异常解析器；**
-- **![image.png](https://cdn.nlark.com/yuque/0/2020/png/1354552/1606047109161-c68a46c1-202a-4db1-bbeb-23fcae49bbe9.png)**
 
+  <img src="resource\异常处理流程1.png" style="zoom:60%;" />
 - - **1、DefaultErrorAttributes先来处理异常。把异常信息保存到rrequest域，并且返回null；**
   - **2、默认没有任何人能处理异常，所以异常会被抛出**
 
 - - - **1、如果没有任何人能处理最终底层就会发送 /error 请求。会被底层的BasicErrorController处理**
+    
+      <img src="resource\没有人处理异常.png" style="zoom:60%;" />
+    
     - **2、解析错误视图；遍历所有的**  **ErrorViewResolver  看谁能解析。**
-    - **![image.png](https://cdn.nlark.com/yuque/0/2020/png/1354552/1606047900473-e31c1dc3-7a5f-4f70-97de-5203429781fa.png)**
+    
+      <img src="resource\异常处理2.png" style="zoom:60%;" />
+    
     - **3、默认的** **DefaultErrorViewResolver ,作用是把响应状态码作为错误页的地址，error/500.html** 
+    
     - **4、模板引擎最终响应这个页面** **error/500.html** 
 
-# 9、Web原生组件注入（Servlet、Filter、Listener）
+# 9.Web原生组件注入（Servlet、Filter、Listener）
 
-## 1、使用Servlet API
+## 1.使用Servlet API
 
 @ServletComponentScan(basePackages = **"com.atguigu.admin"**) :指定原生Servlet组件都放在那里
 
-@WebServlet(urlPatterns = **"/my"**)：效果：直接响应，**没有经过Spring的拦截器？**
+@WebServlet(urlPatterns = **"/my"**)：配置Servlet，效果：直接响应，**没有经过Spring的拦截器**
 
-@WebFilter(urlPatterns={**"/css/\*"**,**"/images/\*"**})
+@WebFilter(urlPatterns={**"/css/\*"**,**"/images/\*"**})配置过滤器
 
-@WebListener
+@WebListener配置监听器
 
+```java
+@WebServlet(urlPatterns = "/my")  //配置映射路径
+public class MyServlet extends HttpServlet {
 
-
-推荐可以这种方式；
-
-
-
-
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        resp.getWriter().write("66666");
+    }
+}
+```
 
 
 
@@ -1729,7 +1814,7 @@ processDispatchResult(processedRequest, response, mappedHandler, **mv**, **dispa
 - **通过** **ServletRegistrationBean**<DispatcherServlet> 把 DispatcherServlet  配置进来。
 - 默认映射的是 / 路径。
 
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1354552/1606284869220-8b63d54b-39c4-40f6-b226-f5f095ef9304.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_14%2Ctext_YXRndWlndS5jb20g5bCa56GF6LC3%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+<img src="resource\DispatcherServlet.png" style="zoom:80%;" />
 
 Tomcat-Servlet；
 
@@ -1739,13 +1824,9 @@ A： /my/
 
 B： /my/1
 
+## 2.使用RegistrationBean
 
-
-
-
-## 2、使用RegistrationBean
-
-```
+```java
 ServletRegistrationBean`, `FilterRegistrationBean`, and `ServletListenerRegistrationBean
 @Configuration
 public class MyRegistConfig {
@@ -1776,11 +1857,9 @@ public class MyRegistConfig {
 }
 ```
 
+# 10.嵌入式Servlet容器
 
-
-# 10、嵌入式Servlet容器
-
-## 1、切换嵌入式Servlet容器
+## 1.切换嵌入式Servlet容器
 
 - 默认支持的webServer
 
@@ -1789,9 +1868,9 @@ public class MyRegistConfig {
 
 - 切换服务器
 
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1354552/1606280937533-504d0889-b893-4a01-af68-2fc31ffce9fc.png)
+<img src="resource\服务器.png" style="zoom:67%;" />
 
-```
+```xml
 <dependency>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-web</artifactId>
@@ -1803,10 +1882,6 @@ public class MyRegistConfig {
     </exclusions>
 </dependency>
 ```
-
-
-
-
 
 - 原理
 
@@ -1820,9 +1895,8 @@ public class MyRegistConfig {
   - `TomcatServletWebServerFactory 创建出Tomcat服务器并启动；TomcatWebServer 的构造器拥有初始化方法initialize---this.tomcat.start();`
   - `内嵌服务器，就是手动把启动服务器的代码调用（tomcat核心jar包存在）`
 
-- ``
 
-## 2、定制Servlet容器
+## 2.定制Servlet容器
 
 - 实现  **WebServerFactoryCu**stomizer<ConfigurableServletWebServerFactory> 
 
@@ -1851,9 +1925,9 @@ public class CustomizationBean implements WebServerFactoryCustomizer<Configurabl
 }
 ```
 
-# 11、定制化原理
+# 11.定制化原理
 
-## 1、定制化的常见方式 
+## 1.定制化的常见方式 
 
 - 修改配置文件；
 - **xxxxxCustomizer；**
@@ -1881,12 +1955,8 @@ public class AdminWebConfig implements WebMvcConfigurer
 
 - ... ...
 
-
-
-## 2、原理分析套路
+## 2.原理分析套路
 
 **场景starter** **- xxxxAutoConfiguration - 导入xxx组件 - 绑定xxxProperties --** **绑定配置文件项** 
 
 
-
-- #GH9jB)
