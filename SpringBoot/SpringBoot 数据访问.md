@@ -1,20 +1,17 @@
-# 1、SQL
+# 1.SQL
 
-## 1、数据源的自动配置-**HikariDataSource**
+## 1.数据源的自动配置-**HikariDataSource**
 
-### 1、导入JDBC场景
+### 1.导入JDBC场景
 
-```
+```xml
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jdbc</artifactId>
         </dependency>
-        
 ```
 
-### ![image.png](https://cdn.nlark.com/yuque/0/2020/png/1354552/1606366100317-5e0199fa-6709-4d32-bce3-bb262e2e5e6a.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_10%2Ctext_YXRndWlndS5jb20g5bCa56GF6LC3%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
-
-
+<img src="resource\数据源.png" style="zoom:60%;" />
 
 
 
@@ -24,7 +21,7 @@
 
 数据库版本和驱动版本对应
 
-```
+```xml
 默认版本：<mysql.version>8.0.22</mysql.version>
 
         <dependency>
@@ -41,13 +38,9 @@
     </properties>
 ```
 
+### 2.分析自动配置
 
-
-
-
-### 2、分析自动配置
-
-#### 1、自动配置的类
+#### 1.自动配置的类
 
 - DataSourceAutoConfiguration ： 数据源的自动配置
 
@@ -55,7 +48,7 @@
   - **数据库连接池的配置，是自己容器中没有DataSource才自动配置的**
   - 底层配置好的连接池是：**HikariDataSource**
 
-```
+```java
     @Configuration(proxyBeanMethods = false)
     @Conditional(PooledDataSourceCondition.class)
     @ConditionalOnMissingBean({ DataSource.class, XADataSource.class })
@@ -64,9 +57,6 @@
             DataSourceConfiguration.Generic.class, DataSourceJmxConfiguration.class })
     protected static class PooledDataSourceConfiguration
 ```
-
-**
-**
 
 - DataSourceTransactionManagerAutoConfiguration： 事务管理器的自动配置
 - JdbcTemplateAutoConfiguration： **JdbcTemplate的自动配置，可以来对数据库进行crud**
@@ -77,13 +67,9 @@
 - JndiDataSourceAutoConfiguration： jndi的自动配置
 - XADataSourceAutoConfiguration： 分布式事务相关的
 
+### 3.修改配置项
 
-
-
-
-### 3、修改配置项
-
-```
+```yaml
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/db_account
@@ -92,62 +78,46 @@ spring:
     driver-class-name: com.mysql.jdbc.Driver
 ```
 
+### 4.测试
 
-
-
-
-### 4、测试
-
-```
-@Slf4j
+```java
 @SpringBootTest
-class Boot05WebAdminApplicationTests {
+class DemoApplicationTests {
 
     @Autowired
     JdbcTemplate jdbcTemplate;
-
-
     @Test
     void contextLoads() {
-
-//        jdbcTemplate.queryForObject("select * from account_tbl")
-//        jdbcTemplate.queryForList("select * from account_tbl",)
-        Long aLong = jdbcTemplate.queryForObject("select count(*) from account_tbl", Long.class);
-        log.info("记录总数：{}",aLong);
+        Long aLong = jdbcTemplate.queryForObject("select count(*) from account", Long.class);
+        System.out.println("记录总数：{}"+aLong);
     }
 
 }
 ```
 
-## 2、使用Druid数据源
+## 2.使用Druid数据源
 
-### 1、druid官方github地址
+### 1.druid官方github地址
 
 https://github.com/alibaba/druid
-
-
 
 整合第三方技术的两种方式
 
 - 自定义
 - 找starter
 
+### 2.自定义方式
 
+#### 1.创建数据源
 
-### 2、自定义方式
-
-#### 1、创建数据源
-
-
-
-```
+```xml
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>druid</artifactId>
             <version>1.1.17</version>
         </dependency>
 
-<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+      <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
         destroy-method="close">
         <property name="url" value="${jdbc.url}" />
         <property name="username" value="${jdbc.username}" />
@@ -165,9 +135,7 @@ https://github.com/alibaba/druid
         <property name="maxOpenPreparedStatements" value="20" />
 ```
 
-
-
-#### 2、StatViewServlet
+#### 2.StatViewServlet
 
 > StatViewServlet的用途包括：
 >
@@ -185,9 +153,7 @@ https://github.com/alibaba/druid
     </servlet-mapping>
 ```
 
-
-
-#### 3、StatFilter
+#### 3.StatFilter
 
 > 用于统计监控信息；如SQL监控、URI监控
 
@@ -221,11 +187,11 @@ https://github.com/alibaba/druid
 使用 slowSqlMillis 定义慢SQL的时长
 ```
 
-### 3、使用官方starter方式
+### 3.使用官方starter方式
 
-#### 1、引入druid-starter
+#### 1.引入druid-starter
 
-```
+```xml
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>druid-spring-boot-starter</artifactId>
@@ -233,9 +199,7 @@ https://github.com/alibaba/druid
         </dependency>
 ```
 
-
-
-#### 2、分析自动配置
+#### 2.分析自动配置
 
 - 扩展配置项 **spring.datasource.druid**
 - DruidSpringAopConfiguration.**class**,  监控SpringBean的；配置项：**spring.datasource.druid.aop-patterns**
@@ -243,7 +207,7 @@ https://github.com/alibaba/druid
 -  DruidWebStatFilterConfiguration.**class**, web监控配置；**spring.datasource.druid.web-stat-filter；默认开启**
 - DruidFilterConfiguration.**class**}) 所有Druid自己filter的配置
 
-```
+```java
     private static final String FILTER_STAT_PREFIX = "spring.datasource.druid.filter.stat";
     private static final String FILTER_CONFIG_PREFIX = "spring.datasource.druid.filter.config";
     private static final String FILTER_ENCODING_PREFIX = "spring.datasource.druid.filter.encoding";
@@ -254,11 +218,9 @@ https://github.com/alibaba/druid
     private static final String FILTER_WALL_PREFIX = "spring.datasource.druid.filter.wall";
 ```
 
+#### 3.配置示例
 
-
-#### 3、配置示例
-
-```
+```yaml
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/db_account
@@ -303,7 +265,7 @@ https://github.com/alibaba/druid/tree/master/druid-spring-boot-starter
 
 
 
-## 3、整合MyBatis操作
+## 3.整合MyBatis操作
 
 https://github.com/mybatis
 
@@ -313,7 +275,7 @@ SpringBoot官方的Starter：spring-boot-starter-*
 
 第三方的： *-spring-boot-starter
 
-```
+```xml
         <dependency>
             <groupId>org.mybatis.spring.boot</groupId>
             <artifactId>mybatis-spring-boot-starter</artifactId>
@@ -321,9 +283,7 @@ SpringBoot官方的Starter：spring-boot-starter-*
         </dependency>
 ```
 
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1354552/1606704096118-53001250-a04a-4210-80ee-6de6a370be2e.png)
-
-### 1、配置模式
+### 1.配置模式
 
 - 全局配置文件
 - SqlSessionFactory: 自动配置好了
@@ -331,7 +291,7 @@ SpringBoot官方的Starter：spring-boot-starter-*
 - @Import(**AutoConfiguredMapperScannerRegistrar**.**class**）；
 - Mapper： 只要我们写的操作MyBatis的接口标准了 **@Mapper 就会被自动扫描进来**
 
-```
+```java
 @EnableConfigurationProperties(MybatisProperties.class) ： MyBatis配置项绑定类。
 @AutoConfigureAfter({ DataSourceAutoConfiguration.class, MybatisLanguageDriverAutoConfiguration.class })
 public class MybatisAutoConfiguration{}
@@ -342,9 +302,7 @@ public class MybatisProperties
 
 可以修改配置文件中 mybatis 开始的所有；
 
-
-
-```
+```xml
 # 配置mybatis规则
 mybatis:
   config-location: classpath:mybatis/mybatis-config.xml  #全局配置文件位置
@@ -363,14 +321,7 @@ Mapper接口--->绑定Xml
 </mapper>
 ```
 
-
-
-
-
 配置 **private** Configuration **configuration**; mybatis.**configuration下面的所有，就是相当于改mybatis全局配置文件中的值**
-
-**
-**
 
 ```
 # 配置mybatis规则
@@ -385,20 +336,14 @@ mybatis:
 
 
 
-
-
 - 导入mybatis官方starter
 - 编写mapper接口。标准@Mapper注解
 - 编写sql映射文件并绑定mapper接口
 - 在application.yaml中指定Mapper配置文件的位置，以及指定全局配置文件的信息 （建议；**配置在mybatis.configuration**）
 
+### 2.注解模式
 
-
-
-
-### 2、注解模式
-
-```
+```java
 @Mapper
 public interface CityMapper {
 
@@ -410,15 +355,9 @@ public interface CityMapper {
 }
 ```
 
+### 3.混合模式
 
-
-
-
-
-
-### 3、混合模式
-
-```
+```java
 @Mapper
 public interface CityMapper {
 
@@ -429,8 +368,6 @@ public interface CityMapper {
 
 }
 ```
-
-
 
 **最佳实战：**
 
@@ -441,11 +378,9 @@ public interface CityMapper {
 - 复杂方法编写mapper.xml进行绑定映射
 - *@MapperScan("com.atguigu.admin.mapper") 简化，其他的接口就可以不用标注@Mapper注解*
 
+## 4.整合 MyBatis-Plus 完成CRUD
 
-
-## 4、整合 MyBatis-Plus 完成CRUD
-
-### 1、什么是MyBatis-Plus
+### 1.什么是MyBatis-Plus
 
 [MyBatis-Plus](https://github.com/baomidou/mybatis-plus)（简称 MP）是一个 [MyBatis](http://www.mybatis.org/mybatis-3/) 的增强工具，在 MyBatis 的基础上只做增强不做改变，为简化开发、提高效率而生。
 
@@ -453,11 +388,9 @@ public interface CityMapper {
 
 建议安装 **MybatisX** 插件 
 
+### 2.整合MyBatis-Plus 
 
-
-### 2、整合MyBatis-Plus 
-
-```
+```xml
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>
@@ -473,23 +406,13 @@ public interface CityMapper {
 - **容器中也自动配置好了** **SqlSessionTemplate**
 - **@Mapper 标注的接口也会被自动扫描；建议直接** @MapperScan(**"com.atguigu.admin.mapper"**) 批量扫描就行
 
-
-
-
-
 **优点：**
 
 -  只需要我们的Mapper继承 **BaseMapper** 就可以拥有crud能力
 
+### 3.CRUD功能
 
-
-
-
-
-
-### 3、CRUD功能
-
-```
+```java
     @GetMapping("/user/delete/{id}")
     public String deleteUser(@PathVariable("id") Long id,
                              @RequestParam(value = "pn",defaultValue = "1")Integer pn,
@@ -536,7 +459,7 @@ public interface CityMapper {
 
 
 
-```
+```java
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements UserService {
 
@@ -548,22 +471,18 @@ public interface UserService extends IService<User> {
 }
 ```
 
-# 2、NoSQL
+# 2.NoSQL
 
 Redis 是一个开源（BSD许可）的，内存中的数据结构存储系统，它可以用作数据库、**缓存**和消息中间件。 它支持多种类型的数据结构，如 [字符串（strings）](http://www.redis.cn/topics/data-types-intro.html#strings)， [散列（hashes）](http://www.redis.cn/topics/data-types-intro.html#hashes)， [列表（lists）](http://www.redis.cn/topics/data-types-intro.html#lists)， [集合（sets）](http://www.redis.cn/topics/data-types-intro.html#sets)， [有序集合（sorted sets）](http://www.redis.cn/topics/data-types-intro.html#sorted-sets) 与范围查询， [bitmaps](http://www.redis.cn/topics/data-types-intro.html#bitmaps)， [hyperloglogs](http://www.redis.cn/topics/data-types-intro.html#hyperloglogs) 和 [地理空间（geospatial）](http://www.redis.cn/commands/geoadd.html) 索引半径查询。 Redis 内置了 [复制（replication）](http://www.redis.cn/topics/replication.html)，[LUA脚本（Lua scripting）](http://www.redis.cn/commands/eval.html)， [LRU驱动事件（LRU eviction）](http://www.redis.cn/topics/lru-cache.html)，[事务（transactions）](http://www.redis.cn/topics/transactions.html) 和不同级别的 [磁盘持久化（persistence）](http://www.redis.cn/topics/persistence.html)， 并通过 [Redis哨兵（Sentinel）](http://www.redis.cn/topics/sentinel.html)和自动 [分区（Cluster）](http://www.redis.cn/topics/cluster-tutorial.html)提供高可用性（high availability）。
 
-## 1、Redis自动配置
+## 1.Redis自动配置
 
-```
+```xml
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
 ```
-
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1354552/1606745732785-17d1227a-75b9-4f00-a3f1-7fc4137b5113.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_10%2Ctext_YXRndWlndS5jb20g5bCa56GF6LC3%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
-
-
 
 自动配置：
 
@@ -572,13 +491,7 @@ Redis 是一个开源（BSD许可）的，内存中的数据结构存储系统�
 - **自动注入了RedisTemplate**<**Object**, **Object**> ： xxxTemplate；
 - **自动注入了StringRedisTemplate；k：v都是String**
 - **key：value**
-- **底层只要我们使用** **StringRedisTemplate、****RedisTemplate就可以操作redis**
-
-**
-**
-
-**
-**
+- **底层只要我们使用** **StringRedisTemplate、RedisTemplate就可以操作redis**
 
 **redis环境搭建**
 
@@ -588,20 +501,9 @@ Redis 是一个开源（BSD许可）的，内存中的数据结构存储系统�
 
 **3、修改白名单  允许0.0.0.0/0 访问**
 
-**
-**
+## 2.RedisTemplate与Lettuce
 
-**
-**
-
-
-
-## 2、RedisTemplate与Lettuce
-
-**
-**
-
-```
+```java
     @Test
     void testRedis(){
         ValueOperations<String, String> operations = redisTemplate.opsForValue();
@@ -613,15 +515,7 @@ Redis 是一个开源（BSD许可）的，内存中的数据结构存储系统�
     }
 ```
 
-
-
-
-
-
-
-
-
-## 3、切换至jedis
+## 3.切换至jedis
 
 ```
         <dependency>
