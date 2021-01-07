@@ -118,8 +118,6 @@ public interface CommandLineRunner {
 }
 ```
 
-##  
-
 ## 2.Application Events and Listeners
 
 https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-application-events-and-listeners

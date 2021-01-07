@@ -112,11 +112,15 @@ redis的作用
 
 ### String(字符串)
 
+单值单value
+
 - string是redis最基本的类型，你可以理解成与Memcached一模一样的类型，一个key对应一个value。
 - string类型是二进制安全的。意思是redis的string可以包含任何数据。比如jpg图片或者序列化的对象 。
 - string类型是Redis最基本的数据类型，一个redis中字符串value最多可以是512M
 
 ### Hash(哈希，类似java里的Map)
+
+KV模式不变，但V是一个键值对
 
 - Redis hash 是一个键值对集合。
 - Redis hash是一个string类型的field和value的映射表，hash特别适合用于存储对象。
@@ -129,9 +133,13 @@ redis的作用
 
 ### Set(集合)
 
+单值多value
+
 - Redis的Set是string类型的无序集合。它是通过HashTable实现实现的
 
 ### Zset(sorted set:有序集合)
+
+在set基础上，加一个score值。 之前set是k1 v1 v2 v3， 现在zset是k1 score1 v1 score2 v2
 
 - Redis zset 和 set 一样也是string类型元素的集合，且不允许重复的成员。
 - 不同的是每个元素都会关联一个double类型的分数。
