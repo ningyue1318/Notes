@@ -164,3 +164,5 @@ public static void main(String[] args) {
 ```
 
 ![](Resources\BeanFactory执行结果.png)
+
+![](Resources\Bean分类.png)
