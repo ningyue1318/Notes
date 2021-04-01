@@ -136,13 +136,13 @@ MergedBeanDefinitionPostProcessor
   - ```
           1.doGetBean(name,null,null,false)
           2.先获取缓存中保存的单实例Bean，如果能获得到说明这个Bean之前被创建过，从下面的地方查找
-             private final Map<String, Object> singletonObjects = new ConcurrentHashMap<>(256);
+             private final Map<String, Object> singletonObjects = new ConcurrentHashMap<>(256);(一级缓存)
           3.缓存中获取不到，开始Bean的创建对象流程
           4.标记当前bean已经被创建
           5.获取Bean的定义信息
           6.获取当前Bean的依赖其他的bean,如果有按照getBean的方式，把依赖的Bean先创建出来
           7.启动单实例bean的创建流程
-              createBean(beanName,mbd,args)
+              1>[创建Bean实例]createBean(beanName,mbd,args)
               Object bean = resolveBeforeInstantiation(beanName,mbdToUse)，让BeanPostProcess拦截返回代理对象
                      InstantiationAwareBeanPostProcessor提前执行，
                      先触发postProcessBeforeInstantiation()方法
@@ -151,15 +151,15 @@ MergedBeanDefinitionPostProcessor
              调用Object beanInstance = doCreateBean(beanName,mbdToUse,args);
                  创建Bean实例，createBeanInstance(beanName,mbd,args)
       		         利用工厂方法或者对象的构造器创建出Bean的实例
-                 applyMergedBeanDefinitionPostProcessors(mbd,beanType,beanName)
-                 populateBean(beanName,mbd,instanceWrapper)为Bean属性赋值
+               2>applyMergedBeanDefinitionPostProcessors(mbd,beanType,beanName)
+               3>[属性赋值] populateBean(beanName,mbd,instanceWrapper)为Bean属性赋值
                         InstantiationAwareBeanPostProcessor后置处理器
                              postProcessAfterInstantiation()
                         InstantiationAwareBeanPostProcessor后置处理器
                              postProcessPropertyValues()
                         为属性赋值，利用setter方法
                              applyPropertyValues(beanName, mbd, bw, pvs)
-                 initializeBean(beanName,exposedObject,mbd)
+               4>[属性初始化]initializeBean(beanName,exposedObject,mbd)
       					invokeAwareMethods，调用XXXAware接口
                              BeanNameAware，BeanClassLoaderAware，BeanFactoryAware
                         applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
@@ -181,3 +181,21 @@ MergedBeanDefinitionPostProcessor
 - 12.1 initLifecycleProcessor()初始化和生命周期有关的后置处理器，查看是否有lifecycleProcessor组件，LifecycleProcessor,如果没有创建默认的
 - 12.2 getLifeCycleProcessor().onRefresh()方法
 - 12.3 发布容器完成事件
+
+
+
+
+
+# **Spring的三级缓存**
+
+> Spring启动过程大致如下：
+> 1.加载配置文件
+> 2.解析配置文件转化beanDefination，获取到bean的所有属性、依赖及初始化用到的各类处理器等
+> 3.创建beanFactory并初始化所有单例bean
+> 4.注册所有的单例bean并返回可用的容器，一般为扩展的applicationContext。
+
+> 1. `singletonObjects`：用于存放完全初始化好的 bean，**从该缓存中取出的 bean 可以直接使用**
+> 2. `earlySingletonObjects`：提前曝光的单例对象的cache，存放原始的 bean 对象（尚未填充属性），用于解决循环依赖
+> 3. `singletonFactories`：单例对象工厂的cache，存放 bean 工厂对象，用于解决循环依赖
+>
+> 所有单例的bean初始化完成后会存放在一个Map(**singletonObjects**)中。**一级缓存之后的其他缓存(二三级缓存)就是为了解决循环依赖**！先将没有填充属性的对象缓存起来，需要的时候先去用这个对象，不必等待一个对象完整的初始化好。而为什么是三级缓存不是二级缓存呢，这里笼统的来说还是方便 Spring 或者开发者们去拓展一些东西（比如后置处理器）。
